@@ -1,0 +1,16 @@
+
+--NOT STARTED--
+calling functions
+if statements
+for loops
+while loops
+
+--STARTED--
+function declaration
+printing arithmetic
+
+--FINISHED--
+variable assignment
+printing
+variable re-assignment
+arithmetic

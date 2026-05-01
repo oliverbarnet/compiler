@@ -1,16 +1,17 @@
 
 --NOT STARTED--
-calling functions
 if statements
 for loops
 while loops
 
 --STARTED--
-function declaration
-printing arithmetic
+calling functions
 
 --FINISHED--
-variable assignment
-printing
-variable re-assignment
-arithmetic
+  -5/1/26-
+    -variable assignment
+    -printing
+    -variable re-assignment
+    -arithmetic
+    -function declaration
+    -printing arithmetic

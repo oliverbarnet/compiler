@@ -1,16 +1,6 @@
 fn x [a, b]: print a + b
 
-let m = 1
-let n = 2
-
-let n
-call n = x [m, n]
-
-print "n:"
-print n
-
 let z
-call z = x [n, 1]
+call z = x [1, 6]
 
-print "z:"
-print z
+if z= 12-5: print "hi"

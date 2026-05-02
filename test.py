@@ -1,6 +1,6 @@
-def s_to_l(s):
-    return [item.strip() for item in s.strip("[]").split(",")]
+x = 5
 
-line = "call x [1, 3]"
+r = range(10) if x == 5 else range(5)
 
-print(s_to_l(line.split("[")[1]))
+for i in r:
+    print(i)

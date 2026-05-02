@@ -21,6 +21,10 @@ class Compiler:
     def s_to_l(self, s):
         return [item.strip() for item in s.strip("[]").split(",")]
 
+    def goodbye(self):
+        try: raise RuntimeError()
+        except RuntimeError: pass
+
     def raise_err(self, c, target=None):
         if c == "undefined variable" or c == "ERR0": self.raised_errors.append(self.base_err(f"Variable '{target}' not defined.", 0))
         if c == "variable 'let' redefine" or c == "ERR1": self.raised_errors.append(self.base_err("Cannot use keyword 'let' to re-define a variable.", 1))
@@ -31,8 +35,9 @@ class Compiler:
         if c == "variable not defined when doing arithmetic" or c == "ERR6": self.raised_errors.append(self.base_err(f"Variable {target} not defined (arithmetci)."))
         if c == "arithmetic sign not recognized" or c == "ERR7": self.raised_errors.append(self.base_err(f"Operator {target} not recognized when doing arithmetic."))
         if c == "undefined function called" or c == "ERR8": self.raised_errors.append(self.base_err(f"Function {target} not defined at time of call."))
-        try: raise RuntimeError()
-        except RuntimeError: pass
+        if c == "incorrect if statement logic syntax" or c == "ERR9": self.raised_errors.append(self.base_err(f"Incorrect syntax for if statement logic. ({target})"))
+        
+        self.goodbye()
 
     def tokenize(self):
         with open(self.filename, "r") as file:
@@ -137,6 +142,7 @@ class Compiler:
                 elif self.check_syntax(line, "variable static declaration"):
                     self.new_variable(True, line[1], None)
             elif len(line) > 4:
+                print(f"{len(line)=}")
                 fixed_line = " ".join(line).split("\"")
                 fixed_line[:] = [item for item in fixed_line if item != ""]
                 self.new_variable(True, fixed_line[0].split(" ")[1], fixed_line[1])
@@ -177,13 +183,17 @@ class Compiler:
     def parse(self, debug_mode=None):
         debug_mode = self.debug_mode if debug_mode == None else None
         first, o, output = "", "", []
+        
+        watch_out = ["call", "if"]
         for index, line in enumerate(self.tokenized):
             first = line[0]
-            if first != "call": 
+            # regular
+            if first not in watch_out:
                 o = self.parse_line(line, debug_mode, index)
                 output.append(o) if o != [] else None
+            
             # call n = x [a, b]
-            else:
+            elif first == "call":
                 target_name = line[1]
                 function_name = line[3]
                 args = self.s_to_l(" ".join(line).split("[")[1])
@@ -201,6 +211,33 @@ class Compiler:
                 o = sum(self.parse_line(fc_line, debug_mode, index))
 
                 self.new_variable(False, target_name, o)
+            
+            # if x = 3: print x
+            elif first == "if":
+                args = " ".join(line).split(":")[0].split("if ")[1].split(" ")
+                
+                for arg_index, arg in enumerate(args):
+                    # variable
+                    if arg in self.variables:
+                        s = str(self.variables[arg])
+                        if self.is_int(s): args[arg_index] = str(s)
+                        else: args[arg_index] = f"\"{str(s)}\""
+
+                    # equals sign (turn into '==' for eval)
+                    if arg == "=": args[arg_index] = "=="
+                
+                fixed_args = " ".join(args)
+                arg_output, code, code_output = "", "", ""
+
+                try: 
+                    arg_output = eval(fixed_args)
+                    code = " ".join(line).split(":")[1].strip().split(" ")
+                    code_output = self.parse_line(code, debug_mode, index) if arg_output == True else None
+                except SyntaxError as e: 
+                    self.raise_err("incorrect if statement logic syntax", e)
+                    self.goodbye()
+                
+                if code_output != None: output = code_output if code_output != None else None
         return output
 
     def debug(self, show_tokenized=None):

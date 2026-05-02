@@ -1,11 +1,10 @@
 
 --NOT STARTED--
-if statements
 for loops
 while loops
 
 --STARTED--
-calling functions
+if statements
 
 --FINISHED--
   -5/1/26-
@@ -15,3 +14,4 @@ calling functions
     -arithmetic
     -function declaration
     -printing arithmetic
+    -calling functions

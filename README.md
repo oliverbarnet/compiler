@@ -1,15 +1,13 @@
 # compiler
 
 ## variables
-##### let var = value - correct
-##### var = value, var already defined - correct
-
-##### var = value, var not yet defined - incorrect
-##### let var = value, var already defined - incorrect
+##### let var = value (var not defined)
+##### var = value (var already defined)
 
 ## printing
-##### print "text" - correct
-##### print var - correct
+##### print "text"
+##### print var
 
-##### print("text") - incorrect
-##### print(var) - incorrect
+## functions
+##### fn x [a, b]: print a + b
+##### call x [a, b]

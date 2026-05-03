@@ -72,9 +72,19 @@ class Compiler:
             if l == "let" and type(name) == str and len(line) == 2: return True
         return False
 
+    def is_print_concat(self, string):
+        return len([item for item in string.split("\"")[1:] if item != ""]) > 1 or "+" in string
+
     def out(self, value, debug_mode=None, line=-1):
         if debug_mode == None: debug_mode = self.debug_mode
         return [line, value] if debug_mode else value
+
+    def replace(self, string, index, replace, char="%"):
+        s, count = list(string), []
+        for i, character in enumerate(s):
+            if character == char: count.append(i)
+        s[count[index]] = replace
+        return "".join(s)
 
     def parse_line(self, line, debug_mode=False, index=-1):
         first = line[0]
@@ -150,10 +160,9 @@ class Compiler:
                     fixed_line = " ".join(line)
                     # string ('let x = "hello world"')
                     if "\"" in fixed_line:
-                        fixed_line[:] = [item for item in fixed_line.split("\"") if item != ""]
+                        fixed_line = [item for item in fixed_line.split("\"") if item != ""]
                         try: self.new_variable(True, fixed_line[0].split(" ")[1], fixed_line[1])
                         except IndexError: self.raise_err("missing quotes at variable declaration", fixed_line[0].split(" ")[1])
-                    
                     # not string (vars or ints)
                     else:
                         args = fixed_line.split("=")[1].strip().split(" ")
@@ -232,12 +241,40 @@ class Compiler:
         # 'print "hi"' or 'print var' or 'print "hello world"'
         elif first == "print":
             fixed_line = " ".join(line)
-            if "\"" in fixed_line:
-                fixed_line = fixed_line.split("\"")
-                fixed_line[:] = [item.strip() for item in fixed_line if item != ""]
-                out = fixed_line[1]
 
+            # has some type of string (concatenation or not)
+            if "\"" in fixed_line:
+                is_concat = self.is_print_concat(fixed_line)
+
+                out = None
+                # isn't concatenation, just string with spaces
+                if not is_concat:
+                    fixed_line = fixed_line.split("\"")
+                    fixed_line = [item.strip() for item in fixed_line if item != ""]
+                    out = fixed_line[1]
+                
+                # is a concatenation
+                else:
+                    out_args = fixed_line.split("print ")[1].split(", ")
+                    s = [item for item in out_args[0].split("\"") if item != ""][0]
+                    vars = fixed_line.split(", [")[1].rstrip("]").split(", ")
+                    percent_index = 0
+                    s_list = list(s)
+                    for char_i, char in enumerate(s_list):
+                        if char == "%":
+                            corresponding_var = vars[percent_index]
+                            if corresponding_var in self.variables:
+                                corresponding_var_val = str(self.variables[corresponding_var])
+                                s_list[char_i] = corresponding_var_val
+                            else:
+                                cleaned_string = corresponding_var.strip("\"")
+                                s_list[char_i] = cleaned_string
+                            percent_index += 1
+
+                    out = "".join(s_list)
                 output.append(self.out(out, debug_mode, index))
+            
+            # just variables
             else:
                 if len(line) == 2:
                     out = line[1]
@@ -331,5 +368,6 @@ compiler = Compiler(filename, False)
 out, dbg = compiler.parse(), compiler.debug()
 
 for o in out: print(o[0])
+print("idrk man")
 
-# print(f"{dbg=}")
+#print(f"{dbg=}")

@@ -1,12 +1,4 @@
-let n = 100
-let z = 5
+let name = "oliver"
+let x = "goodbye"
 
-let a = 100 * 5
-let b = n * z
-let c = 100 * z
-let d = n * 5
-
-print a
-print b
-print c
-print d
+print "hello %! %!", ["oliver", x]

@@ -372,5 +372,6 @@ compiler = Compiler(filename, False)
 out, dbg = compiler.parse(), compiler.debug()
 
 for o in out: print(o[0])
+print("idrk man")
 
 #print(f"{dbg=}")

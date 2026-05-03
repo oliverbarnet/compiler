@@ -372,5 +372,5 @@ compiler = Compiler(filename, False)
 out, dbg = compiler.parse(), compiler.debug()
 
 for o in out: print(o[0])
-print("this is a test")
+
 #print(f"{dbg=}")

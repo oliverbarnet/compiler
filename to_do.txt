@@ -1,9 +1,8 @@
 --NOT STARTED--
-for loops
 while loops
 
 --STARTED--
-string concatenation - printing without defining variables
+  -for loops
 
 --FINISHED--
   -5/1/26-
@@ -18,7 +17,8 @@ string concatenation - printing without defining variables
     -if statements
     -inputs
     -string concatenation - defining variables
-
+  -5/3/25-
+    -string concatenation - printing without defining variables
 
 what did i do this commit:
 -fixed function declaration
@@ -28,3 +28,4 @@ what did i do this commit:
   -from: 'print "hello, %", [name]'
   -to: 'print "hello, %" with [name]'
   -same functionality
+  - started for loops

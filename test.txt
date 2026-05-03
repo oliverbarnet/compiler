@@ -1,6 +1,12 @@
-fn x [a, b]: print a + b
+let n = 100
+let z = 5
 
-let z
-call z = x [1, 6]
+let a = 100 * 5
+let b = n * z
+let c = 100 * z
+let d = n * 5
 
-if z= 12-5: print "hi"
+print a
+print b
+print c
+print d

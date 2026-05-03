@@ -1,6 +1,4 @@
-x = 5
+x = "\"hi \""
 
-r = range(10) if x == 5 else range(5)
-
-for i in r:
-    print(i)
+a = "hello world"
+n = [item for item in x.split("\"") if item != ""]

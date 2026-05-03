@@ -36,7 +36,8 @@ class Compiler:
         if c == "arithmetic sign not recognized" or c == "ERR7": self.raised_errors.append(self.base_err(f"Operator {target} not recognized when doing arithmetic."))
         if c == "undefined function called" or c == "ERR8": self.raised_errors.append(self.base_err(f"Function {target} not defined at time of call."))
         if c == "incorrect if statement logic syntax" or c == "ERR9": self.raised_errors.append(self.base_err(f"Incorrect syntax for if statement logic. ({target})"))
-        
+        if c== "missing quotes at variable declaration" or c == "ERR10": self.raised_errors.append(self.base_err(f"Variable {target} is missing quotes at declaration."))
+
         self.goodbye()
 
     def tokenize(self):
@@ -135,19 +136,98 @@ class Compiler:
         # 'let x = 2'
         # let x
         # 'let x = "hello world"'
+        #      OR
+        # 'let concat x = "hi " + name'
         elif first == "let":
-            if len(line) == 4 or len(line) == 2:
-                if self.check_syntax(line, "variable dynamic declaration"):
-                    self.new_variable(True, line[1], line[3])
-                elif self.check_syntax(line, "variable static declaration"):
-                    self.new_variable(True, line[1], None)
-            elif len(line) > 4:
-                print(f"{len(line)=}")
-                fixed_line = " ".join(line).split("\"")
-                fixed_line[:] = [item for item in fixed_line if item != ""]
-                self.new_variable(True, fixed_line[0].split(" ")[1], fixed_line[1])
+            # regular cases
+            if "concat" not in line:
+                if len(line) == 4 or len(line) == 2:
+                    if self.check_syntax(line, "variable dynamic declaration"):
+                        self.new_variable(True, line[1], line[3])
+                    elif self.check_syntax(line, "variable static declaration"):
+                        self.new_variable(True, line[1], None)
+                elif len(line) > 4:
+                    fixed_line = " ".join(line)
+                    # string ('let x = "hello world"')
+                    if "\"" in fixed_line:
+                        fixed_line[:] = [item for item in fixed_line.split("\"") if item != ""]
+                        try: self.new_variable(True, fixed_line[0].split(" ")[1], fixed_line[1])
+                        except IndexError: self.raise_err("missing quotes at variable declaration", fixed_line[0].split(" ")[1])
+                    
+                    # not string (vars or ints)
+                    else:
+                        args = fixed_line.split("=")[1].strip().split(" ")
+                        first_num = args[0]
+                        second_num = args[2]
 
+                        # both variables
+                        if first_num in self.variables and second_num in self.variables:
+                            for arg_i, arg in enumerate(args):
+                                if arg not in "+-*/": args[arg_i] = str(self.variables[arg])
+                            final_varout = eval(" ".join(args))
 
+                            self.new_variable(True, fixed_line.split(" ")[1], final_varout)
+                        
+                        # both numbers
+                        elif self.is_int(first_num) and self.is_int(second_num):
+                            final_varout = eval(" ".join(args))
+                            self.new_variable(True, fixed_line.split(" ")[1], final_varout)
+                        
+                        # 'a' int, 'b' var
+                        elif self.is_int(first_num) and second_num in self.variables:
+                            for arg_i, arg in enumerate(args):
+                                if arg in self.variables: args[arg_i] = str(self.variables[arg])
+                            final_varout = eval(" ".join(args))
+                            self.new_variable(True, fixed_line.split(" ")[1], final_varout)
+
+                        # 'a' var, 'b' int
+                        elif first_num in self.variables and self.is_int(second_num):
+                            for arg_i, arg in enumerate(args):
+                                if arg in self.variables: args[arg_i] = str(self.variables[arg])
+                            final_varout = eval(" ".join(args))
+                            self.new_variable(True, fixed_line.split(" ")[1], final_varout)
+
+            # concat cases
+            # 'let concat x = "hi " + name', name is defined
+            elif line[1] == "concat":
+                target = line[2]
+                value = " ".join(line).split("=")[1].strip().split("+")
+                for section_index, section in enumerate(value):
+                    # string
+                    if "\"" in section:
+                        updated_val = [item for item in section.split("\"") if item != "" and item != " "][0]
+                        value[section_index] = updated_val
+                    
+                    # variable
+                    elif section.strip() in self.variables:
+                        section = section.strip()
+                        variable_value = self.variables[section]
+                        # number 
+                        if self.is_int(variable_value):
+                            value[section_index] = str(variable_value).strip()
+                        # string
+                        else:
+                            value[section_index] = variable_value.strip()
+                final_out = ""
+                for val in value: final_out += val
+                self.new_variable(True, target, final_out)
+
+        # get user input
+        # 'input x "hello world"', 'x' must be defined as var
+        # 'input x', 'x' must be defined as var
+        elif first == "input":
+            target = line[1]
+            # 'input x'
+            if len(line) == 2:
+                value = input()
+                self.new_variable(False, target, value)
+            
+            # 'input x "what is your name? "'
+            else:
+                prompt = " ".join(line).split("\"")[1].lstrip()
+                value = input(prompt)
+                self.new_variable(False, target, value)
+                
         # print text
         # 'print "hi"' or 'print var' or 'print "hello world"'
         elif first == "print":
@@ -189,7 +269,8 @@ class Compiler:
             first = line[0]
             # regular
             if first not in watch_out:
-                o = self.parse_line(line, debug_mode, index)
+                try: o = self.parse_line(line, debug_mode, index)
+                except KeyboardInterrupt: self.raise_err("keyboard interrupt during parsing")
                 output.append(o) if o != [] else None
             
             # call n = x [a, b]
@@ -208,8 +289,9 @@ class Compiler:
                 for i, item in enumerate(fc_line):
                     if item in function_params:
                         fc_line[i] = args[function_params.index(item)]
-                o = sum(self.parse_line(fc_line, debug_mode, index))
-
+                out = self.parse_line(fc_line, debug_mode, index)
+                try: o = sum(out)
+                except TypeError: o = " ".join(out).strip("[]")
                 self.new_variable(False, target_name, o)
             
             # if x = 3: print x
@@ -248,6 +330,6 @@ compiler = Compiler(filename, False)
 
 out, dbg = compiler.parse(), compiler.debug()
 
-for o in out: print(o)
+for o in out: print(o[0])
 
-# print(dbg)
+# print(f"{dbg=}")

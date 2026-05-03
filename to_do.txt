@@ -2,9 +2,9 @@
 --NOT STARTED--
 for loops
 while loops
-inputs
 
 --STARTED--
+string concatenation - printing without defining variables
 
 --FINISHED--
   -5/1/26-
@@ -17,3 +17,5 @@ inputs
     -calling functions
   -5/2/26-
     -if statements
+    -inputs
+    -string concatenation - defining variables

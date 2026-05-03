@@ -1,4 +1,5 @@
 --NOT STARTED--
+variable deletion
 while loops
 
 --STARTED--
@@ -21,11 +22,4 @@ while loops
     -string concatenation - printing without defining variables
 
 what did i do this commit:
--fixed function declaration
-  -there was a weird syntax thing with '[' and ']'
--fixed string concatenation
--changed syntax
-  -from: 'print "hello, %", [name]'
-  -to: 'print "hello, %" with [name]'
-  -same functionality
-  - started for loops
+-continued for loops

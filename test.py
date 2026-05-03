@@ -1,2 +1,4 @@
-x = [1, 10]
-for i in range(x[0], x[1]): print(i)
+def merge(og, stuff):
+    return stuff + og
+
+print(merge([1, 2, 3], [4, 5]))

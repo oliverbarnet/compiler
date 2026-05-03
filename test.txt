@@ -1,3 +1,6 @@
-for n in [1, 10] loop_1:
+foramount n in [10] loop_1:
 print n
-endfor loop_1
+endforamount loop_1
+
+let times = 5
+print "wow it realy worked! a loop ran % times!" with [times]

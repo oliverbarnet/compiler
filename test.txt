@@ -1,4 +1,8 @@
-let name = "oliver"
-let x = "goodbye"
+let name
+let age
 
-print "hello %! %!", ["oliver", x]
+input name "Name: "
+input age "Age: "
+
+
+print "Hello, %. You are % year(s) old." with [name, age]

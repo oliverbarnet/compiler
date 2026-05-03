@@ -1,4 +1,3 @@
-
 --NOT STARTED--
 for loops
 while loops
@@ -19,3 +18,13 @@ string concatenation - printing without defining variables
     -if statements
     -inputs
     -string concatenation - defining variables
+
+
+what did i do this commit:
+-fixed function declaration
+  -there was a weird syntax thing with '[' and ']'
+-fixed string concatenation
+-changed syntax
+  -from: 'print "hello, %", [name]'
+  -to: 'print "hello, %" with [name]'
+  -same functionality

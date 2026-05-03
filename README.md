@@ -8,6 +8,7 @@
 ## printing
 ##### print "text"
 ##### print var
+##### print "hello, %" with [name] (string concatenation)
 
 ## functions
 ##### fn x [a, b]: print a + b

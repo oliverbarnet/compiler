@@ -8,6 +8,8 @@ class Compiler:
         self.debug_mode = debug_mode
         self.tokenized = self.tokenize()
 
+        # these variables are for sublime text, it has weird syntax
+
     def is_int(self, x):
         return False if False in [True if item in "1234567890" else False for item in x] else True
 
@@ -95,7 +97,7 @@ class Compiler:
         if first == "fn":
             name = line[1]
             fixed_line = " ".join(line)
-            vars = self.s_to_l(f"[{fixed_line.split("[")[1].split("]")[0]}]")
+            vars = self.s_to_l(fixed_line.split("[")[1].split("]")[0])
             function = fixed_line.split(":")[1].lstrip()
             self.function_parameters[name] = vars
             self.function_codes[name] = function
@@ -255,11 +257,13 @@ class Compiler:
                 
                 # is a concatenation
                 else:
-                    out_args = fixed_line.split("print ")[1].split(", ")
-                    s = [item for item in out_args[0].split("\"") if item != ""][0]
-                    vars = fixed_line.split(", [")[1].rstrip("]").split(", ")
+                    out_args = fixed_line.split("print ")[1].split(" with ")
+                    og_string = out_args[:(len(out_args) - 1)][0].strip("\"")
+                    out_args = out_args[len(out_args) - 1]
+                    s = [item for item in out_args[0].split("\"") if item != ""]
+                    vars = self.s_to_l(fixed_line.split(" with [")[1].rstrip("]"))
                     percent_index = 0
-                    s_list = list(s)
+                    s_list = list(og_string)
                     for char_i, char in enumerate(s_list):
                         if char == "%":
                             corresponding_var = vars[percent_index]
@@ -368,6 +372,5 @@ compiler = Compiler(filename, False)
 out, dbg = compiler.parse(), compiler.debug()
 
 for o in out: print(o[0])
-print("idrk man")
 
 #print(f"{dbg=}")

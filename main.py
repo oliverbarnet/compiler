@@ -305,7 +305,7 @@ class Compiler:
         debug_mode = self.debug_mode if debug_mode == None else None
         first, o, output = "", "", []
         
-        watch_out = ["call", "if"]
+        watch_out = ["call", "if", "for"]
         for index, line in enumerate(self.tokenized):
             first = line[0]
             # regular
@@ -361,6 +361,30 @@ class Compiler:
                     self.goodbye()
                 
                 if code_output != None: output = code_output if code_output != None else None
+
+            # for num in [1, 10]:
+            # do stuff
+            # do stuff
+            # do stuff
+            # do stuff
+            # endfor
+            elif first == "for":
+                fixed_line = " ".join(line)
+                interval = [int(item) for item in self.s_to_l(fixed_line.split("in ")[1].split("] ")[0].lstrip("["))]
+                print(f"{interval=}")
+                fixed_tokenized = [" ".join(item) for item in self.tokenized]
+                loop_name = fixed_line.split("] ")[1].strip(":")
+                definition_index = fixed_tokenized.index(fixed_line)
+                endfor_index = fixed_tokenized.index(f"endfor {loop_name}")
+                var_name = line[1]
+
+                code = fixed_tokenized[definition_index + 1:endfor_index]
+
+                for var in range(interval[0], interval[1] + 1):
+                    # STOPPED HERE
+                    # define variables for loop
+                    ...
+                
         return output
 
     def debug(self, show_tokenized=None):
@@ -372,6 +396,5 @@ compiler = Compiler(filename, False)
 out, dbg = compiler.parse(), compiler.debug()
 
 for o in out: print(o[0])
-print("idrk man")
 
 #print(f"{dbg=}")

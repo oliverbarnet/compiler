@@ -13,9 +13,8 @@ class Compiler:
     def is_int(self, x):
         return False if False in [True if item in "1234567890" else False for item in x] else True
 
-    def remove_interval(self, l, interval, zeroth=None):
-        x = [item for index, item in enumerate(l) if index not in range(interval[0], interval[1])]
-        x[0] = zeroth
+    def remove_interval(self, l, interval):
+        x = [item for index, item in enumerate(l) if index not in range(interval[0], interval[1] + 1)]
         return x
 
     def merge(self, og, stuff):
@@ -315,6 +314,7 @@ class Compiler:
         
         watch_out = ["call", "if", "foramount", "foriter"]
         for index, line in enumerate(self.tokenized):
+            print(f"{self.tokenized=}, {line=n}")
             first = line[0]
             # regular
             if first not in watch_out:
@@ -370,7 +370,7 @@ class Compiler:
                 
                 if code_output != None: output = code_output if code_output != None else None
 
-            # for n in [1, 10] loop_1:
+            # foramount n in [5] loop_1:
             # stuff
             # stuff
             # stuff
@@ -378,17 +378,23 @@ class Compiler:
             elif first == "foramount":
                 fixed_tokenized = [" ".join(item) for item in self.tokenized]
                 fixed_defline = " ".join(line)
-                defline_index = 0
+                defline_index = index
+                var_name = " ".join(line).split("foramount ")[1].split(" in ")[0]
                 loop_name = fixed_defline.split("] ")[1].rstrip(":")
-                fixed_endline = f"endforamount {loop_name}"
-                amount = int(" ".join(line).split("in [")[1].split("] ")[0])
-                print(f"{amount=}")
+                fixed_endline = f"endforamopunt {loop_name}"
+                amount = int(" ".join(line).split("in [")[1].split("] ")[0]) + 1
                 endline_index = fixed_tokenized.index(fixed_endline)
-                line_interval = [defline_index, endline_index]
+                code_interval = [defline_index, endline_index] # inclusive, exclusive (index 0 is first line of code, index 1 is endfor line)
+                code = self.tokenized[code_interval[0] + 1:code_interval[1]]
+                
+                self.tokenized = self.remove_interval(self.tokenized, [defline_index + 2, endline_index])
+                #self.tokenized = self.tokenized[0, defline_index + 2]
 
-                self.tokenized = self.remove_interval(self.tokenized, line_interval)
-                print(self.tokenized)
-
+                list_to_add = []
+                for var in range(amount):
+                    list_to_add.append(f"{var_name} = {var}".split(" "))
+                    for item in code: list_to_add.append(item)
+                self.tokenized = self.tokenized[:defline_index + 1] + [f"let {var_name}".split(" ")] + list_to_add + self.tokenized[defline_index + 1:]
         return output
 
     def debug(self, show_tokenized=None):
